@@ -180,7 +180,7 @@ class Rsi(object):
 
                     if dmstate.frames != 1:
                         # BYOND delays are in deciseconds, not seconds!
-                        delay = dmstate.delay[y] / 10
+                        delay = float(dmstate.delay[y]) / 10
                     else:
                         delay = 1.0
                     rsstate.delays[x].append(delay)
