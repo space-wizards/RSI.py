@@ -1,8 +1,8 @@
 import json
 import math
 from pathlib import Path
-from PIL import Image
 from typing import Dict, Tuple, Union, cast, TextIO, Any, List, TypeVar, Type
+from PIL import Image
 from .state import State
 from .helpers import state_name
 
@@ -11,7 +11,7 @@ RSI_LATEST_COMPATIBLE = 1
 
 
 class Rsi(object):
-    def __init__(self, size: Tuple[int, int]):
+    def __init__(self, size: Tuple[int, int]) -> None:
         # Keys are the same as the name on disk (name+flag+flag+flag...)
         self.states = {}  # type: Dict[str, State]
         self.size = size  # type: Tuple[int, int]
@@ -53,14 +53,15 @@ class Rsi(object):
             statedict["flags"] = state.flags
             statedict["directions"] = state.directions
             statedict["delays"] = state.delays
-            statedict["fullname"] = state.full_name  # Non-standard, but removed after the sort so the sort can use it.
+            # Non-standard, but removed after the sort so the sort can use it.
+            statedict["fullname"] = state.full_name
 
             states.append(statedict)
 
         states.sort(key=lambda x: x["fullname"])
 
-        for state in states:
-            del state["fullname"]
+        for statedata in states:
+            del statedata["fullname"]
 
         metajson["states"] = states
 
@@ -72,21 +73,24 @@ class Rsi(object):
             # Amount of columns is the square root of the amount of icons rounded up.
             # Amount of rows is the amount of icons divided by the above rounded up.
             # This ensures it's always as square as possible while being more horizontal if needed.
-            count = 0  # type: int
+            count = 0
             for iconlist in state.icons:
                 count += len(iconlist)
 
-            horizontal = math.ceil(math.sqrt(count))  # type: int
-            sheetdimensions = horizontal, math.ceil(count / horizontal)  # type: Tuple[int, int]
-            image = Image.new(mode="RGBA", size=(self.size[0] * sheetdimensions[0], self.size[1] * sheetdimensions[1]))  # type: Image.Image
+            horizontal = math.ceil(math.sqrt(count))
+            sheetdimensions = horizontal, math.ceil(
+                count / horizontal)
+            image = Image.new(mode="RGBA", size=(
+                self.size[0] * sheetdimensions[0], self.size[1] * sheetdimensions[1]))
 
             count = 0
             for iconlist in state.icons:
                 for icon in iconlist:
-                    row = count % sheetdimensions[0]  # type: int
-                    column = count // sheetdimensions[0]  # type: int
+                    row = count % sheetdimensions[0]
+                    column = count // sheetdimensions[0]
 
-                    point = row * self.size[0], column * self.size[1]  # type: Tuple[int, int]
+                    point = row * self.size[0], column * \
+                        self.size[1]
                     image.paste(icon, box=point)
 
                     count += 1
@@ -95,7 +99,7 @@ class Rsi(object):
             image.save(pngpath, "PNG")
 
     @classmethod
-    def open(cls: Type[T], path: Union[str, Path]) -> T:
+    def open(cls: Type[T], path: Union[str, Path]) -> "Rsi":
         if isinstance(path, str):
             path = Path(path)
 
@@ -111,16 +115,19 @@ class Rsi(object):
         rsi = Rsi((meta["size"]["x"], meta["size"]["y"]))  # type: Rsi
 
         for state in meta["states"]:
-            newstate = rsi.new_state(state["directions"], state["name"], state["select"])  # type: State
+            newstate = rsi.new_state(
+                state["directions"], state["name"], state["select"])  # type: State
             newstate.flags = state["flags"]
 
-            image = Image.open(path.joinpath(newstate.full_name + ".png"))  # type: Image.Image
-            sheetdimensions = image.width // rsi.size[0], image.height // rsi.size[1]  # type: Tuple[int, int]
+            image = Image.open(path.joinpath(
+                newstate.full_name + ".png"))  # type: Image.Image
+
+            sheetdimensions = image.width // rsi.size[0], image.height // rsi.size[1]
 
             totaldone = 0  # type: int
             for direction in range(newstate.directions):
                 todo = 1  # type: int
-                if state.get("delays") is not None and state["delays"][direction] is not None and len(state["delays"][direction]) != 0:
+                if state.get("delays") is not None and state["delays"][direction]:
                     todo = len(state["delays"][direction])
                     newstate.delays[direction] = state["delays"][direction]
 
@@ -129,15 +136,18 @@ class Rsi(object):
                 # Crop the icons.
                 for x in range(todo):
                     # Get coordinates to cut at from main image.
-                    box = (totaldone % sheetdimensions[0]) * rsi.size[0], (totaldone // sheetdimensions[0]) * rsi.size[1]  # type: Tuple[int, int]
-                    cropped = image.crop((box[0], box[1], box[0] + rsi.size[0], box[1] + rsi.size[1]))  # type: Image.Image
+                    box = ((totaldone % sheetdimensions[0]) * rsi.size[0],
+                           (totaldone // sheetdimensions[0]) * rsi.size[1])
+
+                    cropped = image.crop(
+                        (box[0], box[1], box[0] + rsi.size[0], box[1] + rsi.size[1]))
                     newstate.icons[direction][x] = cropped
                     totaldone += 1
 
         return rsi
 
     @classmethod
-    def from_dmi(cls: Type[T], path: str) -> T:
+    def from_dmi(cls: Type[T], path: str) -> "Rsi":
         try:
             from byond.DMI import DMI
         except ImportError:
@@ -155,12 +165,14 @@ class Rsi(object):
             # BYOND does not permit direction specific delays so this is easy.
             for x in range(rsstate.directions):
                 rsstate.delays[x] = []
-                # Circumvent around a BYOND bug (?) where states have more delays than actual frames.
+                # Circumvent around a BYOND bug (?)
+                # where states have more delays than actual frames.
                 for y in range(dmstate.frames):
                     if dmstate.frames != 1:
-                        delay = float(dmstate.delay[x])
+                        delay = float(dmstate.delay[y])
                         rsstate.delays[x].append(delay)
 
-                rsstate.icons[x] = dmstate.icons[x * dmstate.frames:(x + 1) * dmstate.frames]
+                rsstate.icons[x] = dmstate.icons[x *
+                                                 dmstate.frames:(x + 1) * dmstate.frames]
 
         return rsi
