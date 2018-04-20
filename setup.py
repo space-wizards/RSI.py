@@ -1,3 +1,4 @@
+#!/usr/bin/env python3``
 from setuptools import setup
 
 setup(
@@ -21,5 +22,6 @@ setup(
         "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
         "Topic :: Software Development :: Libraries :: Python Modules"
-    ]
+    ],
+    entry_points={'console_scripts': ['rsi=rsi.__main__:main']},
 )

@@ -147,11 +147,14 @@ class Rsi(object):
         return rsi
 
     @classmethod
-    def from_dmi(cls: Type[T], path: str) -> "Rsi":
+    def from_dmi(cls: Type[T], path: Union[str, Path]) -> "Rsi":
         try:
             from byond.DMI import DMI
         except ImportError:
             raise ImportError("Unable to import byondtoolsv3.")
+
+        if isinstance(path, Path):
+            path = str(path)
 
         # N3X15, if you are reading this:
         # You are awful at API design.
