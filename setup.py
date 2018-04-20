@@ -1,9 +1,9 @@
-#!/usr/bin/env python3``
+#!/usr/bin/env python3
 from setuptools import setup
 
 setup(
     name="RSI.py",
-    version="1.0.2",
+    version="1.1.0",
     description="A library for manipulation of the RSI format used in Space Station 14.",
     url="https://github.com/space-wizards/RSI.py",
     author="Pieter-Jan Briers",
@@ -23,5 +23,8 @@ setup(
         "Programming Language :: Python :: 3.6",
         "Topic :: Software Development :: Libraries :: Python Modules"
     ],
+    project_urls={
+        "Source": "https://github.com/space-wizards/RSI.py"
+    },
     entry_points={'console_scripts': ['rsi=rsi.__main__:main']},
 )
