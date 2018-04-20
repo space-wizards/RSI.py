@@ -3,8 +3,8 @@ from setuptools import setup
 setup(
     name="RSI.py",
     version="1.0.2",
-    description="A library for manipulation of the RSI format used in YASSS13RTWCF.",
-    url="https://github.com/NanotrasenInc/RSI.py",
+    description="A library for manipulation of the RSI format used in Space Station 14.",
+    url="https://github.com/space-wizards/RSI.py",
     author="Pieter-Jan Briers",
     author_email="pieterjan.briers@gmail.com",
     license="MIT",
