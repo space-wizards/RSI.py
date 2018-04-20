@@ -3,8 +3,9 @@ import math
 from pathlib import Path
 from typing import Dict, Tuple, Union, cast, TextIO, Any, List, TypeVar, Type
 from PIL import Image
-from .state import State
+from .direction import Direction
 from .helpers import state_name
+from .state import State
 
 T = TypeVar("T")
 RSI_LATEST_COMPATIBLE = 1
@@ -94,6 +95,7 @@ class Rsi(object):
                     image.paste(icon, box=point)
 
                     count += 1
+                # break
 
             pngpath = path.joinpath(state.full_name + ".png")  # type: Path
             image.save(pngpath, "PNG")
@@ -163,19 +165,27 @@ class Rsi(object):
         rsi = Rsi((dmi.icon_width, dmi.icon_height))
 
         for dmstate in dmi.states.values():
+            if dmstate.dirs == 8:
+                continue
+
             rsstate = rsi.new_state(dmstate.dirs, dmstate.name)  # type: State
 
             # BYOND does not permit direction specific delays so this is easy.
             for x in range(rsstate.directions):
+                direction = Direction(x)
                 rsstate.delays[x] = []
-                # Circumvent around a BYOND bug (?)
-                # where states have more delays than actual frames.
                 for y in range(dmstate.frames):
+                    print(y, dmstate.frames, dmstate.delay)
+                    # Circumvent around a BYOND bug (?)
+                    # where states have more delays than actual frames.
+                    if dmstate.frames <= y:
+                        break
+
                     if dmstate.frames != 1:
                         delay = float(dmstate.delay[y])
-                        rsstate.delays[x].append(delay)
-
-                rsstate.icons[x] = dmstate.icons[x *
-                                                 dmstate.frames:(x + 1) * dmstate.frames]
+                    else:
+                        delay = 1.0
+                    rsstate.delays[x].append(delay)
+                    rsstate.icons[x].append(dmstate.getFrame(direction.to_byond(), y))
 
         return rsi
