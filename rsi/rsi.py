@@ -112,8 +112,6 @@ class Rsi(object):
         with metapath.open() as f:
             meta = json.loads(f.read())  # type: Dict[str, Any]
 
-        print(meta)
-
         rsi = Rsi((meta["size"]["x"], meta["size"]["y"]))  # type: Rsi
 
         for state in meta["states"]:
@@ -175,7 +173,6 @@ class Rsi(object):
                 direction = Direction(x)
                 rsstate.delays[x] = []
                 for y in range(dmstate.frames):
-                    print(y, dmstate.frames, dmstate.delay)
                     # Circumvent around a BYOND bug (?)
                     # where states have more delays than actual frames.
                     if dmstate.frames <= y:
