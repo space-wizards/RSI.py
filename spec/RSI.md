@@ -68,7 +68,7 @@ Note that in practice the JSON writer probably writes the most compact JSON poss
     "version": 1,
 
     "license": "CC0-1.0",
-    "copyright": "GitHub @PJB3005"
+    "copyright": "GitHub @PJB3005",
 
     "size": {
         "x": 32,
