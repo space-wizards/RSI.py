@@ -1,13 +1,12 @@
 import json
 import math
 from pathlib import Path
-from typing import Dict, Tuple, Union, cast, TextIO, Any, List, TypeVar, Type
+from typing import Dict, Tuple, Union, cast, TextIO, Any, List, Type, Optional
 from PIL import Image
 from .direction import Direction
 from .helpers import state_name
 from .state import State
 
-T = TypeVar("T")
 RSI_LATEST_COMPATIBLE = 1
 
 
@@ -16,6 +15,8 @@ class Rsi(object):
         # Keys are the same as the name on disk (name+flag+flag+flag...)
         self.states = {}  # type: Dict[str, State]
         self.size = size  # type: Tuple[int, int]
+        self.license = None  # type: Optional[str]
+        self.copyright = None  # type: Optional[str]
 
     def get_state(self, name: str, selectors: List[str] = None) -> State:
         return self.states.get(state_name(name, selectors))
@@ -28,7 +29,7 @@ class Rsi(object):
         self.set_state(newstate, name, selectors)
         return newstate
 
-    def write(self, path: Union[str, Path]) -> None:
+    def write(self, path: Union[str, Path], make_parent_dirs: bool = True) -> None:
         if isinstance(path, str):
             path = Path(path)
 
@@ -38,13 +39,18 @@ class Rsi(object):
                 raise IOError("Attempted to write RSI to a non-directory.")
 
         else:
-            path.mkdir()
+            path.mkdir(parents=make_parent_dirs)
 
         # Write metadata json file.
         metapath = path.joinpath("meta.json")  # type: Path
         metajson = {}  # type: Dict[str, Any]
         metajson["version"] = RSI_LATEST_COMPATIBLE
         metajson["size"] = {"x": self.size[0], "y": self.size[1]}
+        if self.license is not None:
+            metajson["license"] = self.license
+
+        if self.copyright is not None:
+            metajson["copyright"] = self.copyright
 
         states = []  # type: List[Dict[str, Any]]
         for state in self.states.values():
@@ -54,7 +60,7 @@ class Rsi(object):
             statedict["flags"] = state.flags
             statedict["directions"] = state.directions
             statedict["delays"] = state.delays
-            # Non-standard, but removed after the sort so the sort can use it.
+            # Non-standard, but removed after the sort so the sort can use it while sorting.
             statedict["fullname"] = state.full_name
 
             states.append(statedict)
@@ -101,7 +107,7 @@ class Rsi(object):
             image.save(pngpath, "PNG")
 
     @classmethod
-    def open(cls: Type[T], path: Union[str, Path]) -> "Rsi":
+    def open(cls, path: Union[str, Path]) -> "Rsi":
         if isinstance(path, str):
             path = Path(path)
 
@@ -113,6 +119,12 @@ class Rsi(object):
             meta = json.loads(f.read())  # type: Dict[str, Any]
 
         rsi = Rsi((meta["size"]["x"], meta["size"]["y"]))  # type: Rsi
+
+        if "copyright" in meta:
+            rsi.copyright = meta["copyright"]
+
+        if "license" in meta:
+            rsi.license = meta["license"]
 
         for state in meta["states"]:
             newstate = rsi.new_state(
@@ -147,7 +159,7 @@ class Rsi(object):
         return rsi
 
     @classmethod
-    def from_dmi(cls: Type[T], path: Union[str, Path]) -> "Rsi":
+    def from_dmi(cls, path: Union[str, Path]) -> "Rsi":
         try:
             from byond.DMI import DMI
         except ImportError:
