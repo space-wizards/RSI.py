@@ -18,14 +18,14 @@ class Rsi(object):
         self.license = None  # type: Optional[str]
         self.copyright = None  # type: Optional[str]
 
-    def get_state(self, name: str, selectors: List[str] = None) -> State:
+    def get_state(self, name: str, selectors: Optional[List[str]] = None) -> Optional[State]:
         return self.states.get(state_name(name, selectors))
 
-    def set_state(self, state: State, name: str, selectors: List[str] = None) -> None:
+    def set_state(self, state: State, name: str, selectors: Optional[List[str]] = None) -> None:
         self.states[state_name(name, selectors)] = state
 
-    def new_state(self, directions: int, name: str, selectors: List[str] = None) -> State:
-        newstate = State(name, selectors, self.size, directions)
+    def new_state(self, directions: int, name: str, selectors: Optional[List[str]] = None) -> State:
+        newstate = State(name, selectors or [], self.size, directions)
         self.set_state(newstate, name, selectors)
         return newstate
 
@@ -56,8 +56,10 @@ class Rsi(object):
         for state in self.states.values():
             statedict = {}  # type: Dict[str, Any]
             statedict["name"] = state.name
-            statedict["select"] = state.selectors
-            statedict["flags"] = state.flags
+            if state.selectors:
+                statedict["select"] = state.selectors
+            if state.flags:
+                statedict["flags"] = state.flags
             statedict["directions"] = state.directions
             statedict["delays"] = state.delays
             # Non-standard, but removed after the sort so the sort can use it while sorting.
@@ -128,8 +130,10 @@ class Rsi(object):
 
         for state in meta["states"]:
             newstate = rsi.new_state(
-                state["directions"], state["name"], state["select"])  # type: State
-            newstate.flags = state["flags"]
+                state["directions"], state["name"], state.get("select", []))  # type: State
+
+            if "flags" in state:
+                newstate.flags = state["flags"]
 
             image = Image.open(path.joinpath(
                 newstate.full_name + ".png"))  # type: Image.Image

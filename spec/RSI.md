@@ -27,7 +27,7 @@ States have Two fields that can be used to distinguish them:
 Key | Meaning
 --- | -------
 `name` | The name of the state. Can only contain lowercase alphabetic, numerical, and some special (`_-`) characters.
-`select` | A list of strings. There will be a very specific list of selectors and these can not be used arbitrarily.
+`select` | A list of strings. There will be a very specific list of selectors and these can not be used arbitrarily. Optional.
 
 States cannot have all the same identifying values. A state with different flags and same name can thus exist, while two states with the same name and no flags will be incorrect.
 
@@ -35,7 +35,7 @@ Other than identifiers, a state has two other fields in relation to the actual s
 
 Key | Meaning
 --- | -------
-`flags` | An associative list of `key: object` for defining extra data. There is currently no usage yet.
+`flags` | An associative list of `key: object` for defining extra data. There is currently no usage yet. Optional.
 `directions` | A number corresponding to the amount of directions a state has. This should only be a `1` or a `4`.
 `delays` | Can be left out. If defined, a list of lists of delays for an animated icon state. Each list in the list corresponds to a direction. The delays are floats and represent seconds.
 

@@ -10,7 +10,7 @@ class State(object):
                  size: Tuple[int, int],
                  directions: int = 1) -> None:
         self.name = name  # type: str
-        self.selectors = selectors or []  # type: List[str]
+        self.selectors = selectors  # type: List[str]
         self.full_name = state_name(self.name, self.selectors)  # type: str
         self.flags = {}  # type: Dict[str, Any]
         self.size = size  # type: Tuple[int, int]
