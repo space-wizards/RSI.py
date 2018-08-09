@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
     name="RSI.py",
-    version="1.1.3",
+    version="1.1.4",
     description="A library for manipulation of the RSI format used in Space Station 14.",
     url="https://github.com/space-wizards/RSI.py",
     author="Pieter-Jan Briers",
@@ -21,6 +21,7 @@ setup(
         "Operating System :: OS Independent",
         "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
         "Topic :: Software Development :: Libraries :: Python Modules"
     ],
     project_urls={
