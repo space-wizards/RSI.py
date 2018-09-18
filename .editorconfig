@@ -1,5 +1,5 @@
 [*.py]
 insert_final_newline = true
 indent_size = 4
-indent_style = 4
+indent_style = space
 trim_trailing_whitespace = true

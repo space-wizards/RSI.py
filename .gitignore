@@ -6,3 +6,4 @@ dist/
 .mypy_cache
 files.txt
 .vscode
+.idea
