@@ -36,20 +36,24 @@ Other than identifiers, a state has two other fields in relation to the actual s
 Key | Meaning
 --- | -------
 `flags` | An associative list of `key: object` for defining extra data. There is currently no usage yet. Optional.
-`directions` | A number corresponding to the amount of directions a state has. This should only be a `1` or a `4`.
+`directions` | A number corresponding to the amount of directions a state has. This should be a `1`, a `4` or an `8`.
 `delays` | Can be left out. If defined, a list of lists of delays for an animated icon state. Each list in the list corresponds to a direction. The delays are floats and represent seconds.
 
 States are always ordered alphabetically by their corresponding file name.
 
 #### Directions
 
-There are currently two supported direction types: `1` (no directions) and `4` (North South East West).
+There are currently three supported direction types: `1` (no directions), `4` (North South East West), and `8` (North South East West plus diagonals).
 These directions are ordered (for layout in the `delays` field and ordering in the sprite sheet) in the following order:
 
 * South
 * North
 * East
 * West
+* South East
+* South West
+* North East
+* North West
 
 #### Sprite sheet
 

@@ -179,9 +179,6 @@ class Rsi(object):
         rsi = Rsi((dmi.icon_width, dmi.icon_height))
 
         for dmstate in dmi.states.values():
-            if dmstate.dirs == 8:
-                continue
-
             rsstate = rsi.new_state(dmstate.dirs, dmstate.name)  # type: State
 
             # BYOND does not permit direction specific delays so this is easy.
