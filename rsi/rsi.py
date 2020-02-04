@@ -4,7 +4,6 @@ from pathlib import Path
 from typing import Dict, Tuple, Union, cast, TextIO, Any, List, Type, Optional
 from PIL import Image
 from .direction import Direction
-from .helpers import state_name
 from .state import State
 
 RSI_LATEST_COMPATIBLE = 1
@@ -18,15 +17,15 @@ class Rsi(object):
         self.license = None  # type: Optional[str]
         self.copyright = None  # type: Optional[str]
 
-    def get_state(self, name: str, selectors: Optional[List[str]] = None) -> Optional[State]:
-        return self.states.get(state_name(name, selectors))
+    def get_state(self, name: str) -> Optional[State]:
+        return self.states.get(name)
 
-    def set_state(self, state: State, name: str, selectors: Optional[List[str]] = None) -> None:
-        self.states[state_name(name, selectors)] = state
+    def set_state(self, state: State, name: str) -> None:
+        self.states[name] = state
 
-    def new_state(self, directions: int, name: str, selectors: Optional[List[str]] = None) -> State:
-        newstate = State(name, selectors or [], self.size, directions)
-        self.set_state(newstate, name, selectors)
+    def new_state(self, directions: int, name: str) -> State:
+        newstate = State(name, self.size, directions)
+        self.set_state(newstate, name)
         return newstate
 
     def write(self, path: Union[str, Path], make_parent_dirs: bool = True) -> None:
@@ -56,21 +55,14 @@ class Rsi(object):
         for state in self.states.values():
             statedict = {}  # type: Dict[str, Any]
             statedict["name"] = state.name
-            if state.selectors:
-                statedict["select"] = state.selectors
             if state.flags:
                 statedict["flags"] = state.flags
             statedict["directions"] = state.directions
             statedict["delays"] = state.delays
-            # Non-standard, but removed after the sort so the sort can use it while sorting.
-            statedict["fullname"] = state.full_name
 
             states.append(statedict)
 
-        states.sort(key=lambda x: x["fullname"])
-
-        for statedata in states:
-            del statedata["fullname"]
+        states.sort(key=lambda x: x["name"])
 
         metajson["states"] = states
 
@@ -105,7 +97,7 @@ class Rsi(object):
                     count += 1
                 # break
 
-            pngpath = path.joinpath(state.full_name + ".png")  # type: Path
+            pngpath = path.joinpath(state.name + ".png")  # type: Path
             image.save(pngpath, "PNG")
 
     @classmethod
@@ -130,7 +122,7 @@ class Rsi(object):
 
         for state in meta["states"]:
             newstate = rsi.new_state(
-                state["directions"], state["name"], state.get("select", []))  # type: State
+                state["directions"], state["name"])  # type: State
 
             if "flags" in state:
                 newstate.flags = state["flags"]
