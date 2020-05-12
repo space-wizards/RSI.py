@@ -28,7 +28,7 @@ class Rsi(object):
         self.set_state(newstate, name)
         return newstate
 
-    def write(self, path: Union[str, Path], make_parent_dirs: bool = True) -> None:
+    def write(self, path: Union[str, Path], make_parent_dirs: bool = True, indent: Optional[int] = None) -> None:
         if isinstance(path, str):
             path = Path(path)
 
@@ -67,7 +67,7 @@ class Rsi(object):
         metajson["states"] = states
 
         with metapath.open("w") as f:
-            f.write(json.dumps(metajson))
+            f.write(json.dumps(metajson, indent=indent))
 
         # Write PNG files.
         for state in self.states.values():
