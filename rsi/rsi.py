@@ -128,7 +128,7 @@ class Rsi(object):
                 newstate.flags = state["flags"]
 
             image = Image.open(path.joinpath(
-                newstate.full_name + ".png"))  # type: Image.Image
+                newstate.name + ".png"))  # type: Image.Image
 
             sheetdimensions = image.width // rsi.size[0], image.height // rsi.size[1]
 
