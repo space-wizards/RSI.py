@@ -1,7 +1,12 @@
 import argparse
 from pathlib import Path
 from typing import Optional
-from rsi import Rsi
+from rsi import (
+    export_web_dmi_to_rsi,
+    Rsi,
+    HyphenSplitter,
+    SimpleSplitter,
+)
 
 
 def main() -> int:
@@ -24,6 +29,13 @@ def main() -> int:
     _new_rsi.add_argument("-l", "--license", action="store", help="The license of this RSI file, as valid SPDX License Identifier (Google it).", nargs="?")
     _new_rsi.add_argument("--dont-make-parent-dirs", action="store_true", help="Do not create parent directories if they do not exist, instead throw an error.", dest="no_parents")
 
+    _web_rsi = subparser.add_parser("web", help="Download a .dmi and convert to an .rsi")
+    _web_rsi.add_argument("url", help="Web url of the blob holding the .dmi")
+    _web_rsi.add_argument("output", help="Specifies the output file name.")
+    _web_rsi.add_argument("-l", "--license", action="store", help="The license of this RSI file, as valid SPDX License Identifier (Google it).", nargs="?")
+    _web_rsi.add_argument("-s", "--splitter", action="store", help="The class to split the rsi states if required.")
+    _web_rsi.add_argument("-i", "--indents", action="store", help="The number of indents for meta.json")
+
     args = parser.parse_args()
 
     if args.command == "from_dmi":
@@ -32,6 +44,9 @@ def main() -> int:
 
     if args.command == "new":
         return new_rsi(args.rsi, args.dimensions, args.copyright, args.license, not args.no_parents)
+
+    if args.command == "web":
+        return web_rsi(args.url, args.output, args.license, args.splitter, args.indents)
 
     print("No command specified!")
     return 1
@@ -72,4 +87,28 @@ def new_rsi(loc: Path,
     rsi.copyright = rsi_copyright
     rsi.write(loc, make_parents)
 
+    return 0
+
+
+def web_rsi(url: str,
+            output: Path,
+            rsi_license: Optional[str] = "",
+            splitter: Optional[str] = "",
+            indents: Optional[int] = None) -> int:
+
+    if isinstance(indents, str):
+        indents = int(indents)
+
+    splitter_class = {
+        "hyphen": HyphenSplitter,
+        "simple": SimpleSplitter
+    }.get(splitter, None)
+
+    if splitter is not None and splitter_class is None:
+        print(f"Invalid splitter supplied")
+        return 1
+
+    output = Path(output)
+
+    export_web_dmi_to_rsi(url, output, rsi_license, splitter_class, indents)
     return 0
