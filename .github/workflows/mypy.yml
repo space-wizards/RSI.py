@@ -25,4 +25,4 @@ jobs:
       run: python -m pip install mypy
 
     - name: Run mypyp
-      run: mypy rsi/
+      run: mypy rsi/ --strict --ignore-missing-imports
