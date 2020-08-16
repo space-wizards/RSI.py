@@ -42,6 +42,7 @@ def export_web_dmi_to_rsi(
     """
     rsi = web_dmi_to_rsi(url)
     rsi.license = rsi_license
+    rsi.copyright = url
 
     if splitter is None:
         rsi.write(path.with_suffix(".rsi"), make_parent_dirs=True, indent=indents)
