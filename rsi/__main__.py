@@ -1,7 +1,7 @@
 import argparse
 from pathlib import Path
 from typing import Optional
-from rsi import Rsi
+from rsi import Rsi, rsi_state_diff
 
 
 def main() -> int:
@@ -24,6 +24,11 @@ def main() -> int:
     _new_rsi.add_argument("-l", "--license", action="store", help="The license of this RSI file, as valid SPDX License Identifier (Google it).", nargs="?")
     _new_rsi.add_argument("--dont-make-parent-dirs", action="store_true", help="Do not create parent directories if they do not exist, instead throw an error.", dest="no_parents")
 
+    _image_diff = subparser.add_parser("diff", help="Will output the image differences between 2 rsi state images.")
+    _image_diff.add_argument("source", help="The image to compare against the target. Supports multiple frames.", type=Path)
+    _image_diff.add_argument("target", help="The base image to be compared against. Single frame only.", type=Path)
+    _image_diff.add_argument("output", help="Filepath to output the result to.", type=Path)
+
     args = parser.parse_args()
 
     if args.command == "from_dmi":
@@ -32,6 +37,10 @@ def main() -> int:
 
     if args.command == "new":
         return new_rsi(args.rsi, args.dimensions, args.copyright, args.license, not args.no_parents)
+
+    if args.command == "diff":
+        image_diff(args.source, args.target, args.output)
+        return 0
 
     print("No command specified!")
     return 1
@@ -73,3 +82,10 @@ def new_rsi(loc: Path,
     rsi.write(loc, make_parents)
 
     return 0
+
+
+def image_diff(source: Path,
+               target: Path,
+               output: Path) -> None:
+
+    rsi_state_diff(source, target, output)
