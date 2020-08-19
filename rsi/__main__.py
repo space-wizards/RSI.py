@@ -6,6 +6,7 @@ from rsi import (
     Rsi,
     HyphenSplitter,
     NumberSplitter,
+    RsiSplitter,
     SimpleSplitter,
     UnderscoreSplitter,
 )
@@ -63,7 +64,7 @@ def from_dmi(inputf,
         "number": NumberSplitter,
         "simple": SimpleSplitter,
         "underscore": UnderscoreSplitter,
-    }.get(splitter, None)
+    }.get(splitter, None)  # type: ignore
 
     if splitter_class is None:
         rsi.write(output)
