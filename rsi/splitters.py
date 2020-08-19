@@ -55,7 +55,7 @@ class HyphenSplitter(RsiSplitter):
     """
 
     def _split(self) -> List[Rsi]:
-        groups = {}
+        groups: Dict[str, Rsi] = {}
 
         for name, state in self.rsi.states.items():
             prefix = name.split("-")[0]
@@ -79,7 +79,7 @@ class UnderscoreSplitter(RsiSplitter):
     """
 
     def _split(self) -> List[Rsi]:
-        groups = {}
+        groups: Dict[str, Rsi] = {}
 
         for name, state in self.rsi.states.items():
             prefix = name.split("_")[0]
@@ -104,7 +104,7 @@ class NumberSplitter(RsiSplitter):
     """
 
     def _split(self) -> List[Rsi]:
-        groups = {}
+        groups: Dict[str, Rsi] = {}
         pattern = re.compile("([^0-9]*)([0-9]*)")
 
         for name, state in self.rsi.states.items():

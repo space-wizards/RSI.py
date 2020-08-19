@@ -8,4 +8,12 @@ from .splitters import (
 )
 from .state import State
 
-__all__ = [ "Rsi", "State" ]
+__all__ = [
+    "Rsi",
+    "State" ,
+    "HyphenSplitter",
+    "NumberSplitter",
+    "RsiSplitter",
+    "SimpleSplitter",
+    "UnderscoreSplitter"
+]
