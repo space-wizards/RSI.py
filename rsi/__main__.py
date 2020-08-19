@@ -5,7 +5,9 @@ from rsi import (
     export_web_dmi_to_rsi,
     Rsi,
     HyphenSplitter,
+    NumberSplitter,
     SimpleSplitter,
+    UnderscoreSplitter,
 )
 
 
@@ -101,7 +103,9 @@ def web_rsi(url: str,
 
     splitter_class = {
         "hyphen": HyphenSplitter,
-        "simple": SimpleSplitter
+        "number": NumberSplitter,
+        "simple": SimpleSplitter,
+        "underscore": UnderscoreSplitter,
     }.get(splitter, None)
 
     if splitter is not None and splitter_class is None:

@@ -2,9 +2,10 @@
 Used for converting a single .rsi file into mutiple smaller ones
 """
 from rsi import Rsi
-from typing import List, Optional
+from typing import Dict, List, Optional
 from abc import ABC
 from pathlib import Path
+import re
 
 
 class RsiSplitter(ABC):
@@ -14,22 +15,20 @@ class RsiSplitter(ABC):
 
     def __init__(self, rsi: Rsi) -> None:
         self.rsi = rsi
+        # Store the name to use for each rsi group
+        self.names: Dict[Rsi, str] = {}
 
     def _split(self) -> List[Rsi]:
         raise NotImplementedError
 
-    def _get_name(self, rsi: Rsi):
-        """
-        Get the name of a split rsi
-        :param rsi:
-        :return:
-        """
-        raise NotImplementedError
-
     def split_to(self, path: Path, indents: Optional[int] = None) -> None:
         for rsi in self._split():
-            rsi_path = path.joinpath(self._get_name(rsi)).with_suffix(".rsi")
+            rsi.license = self.rsi.license
+            rsi.copyright = self.rsi.copyright
+            rsi_path = path.joinpath(self.names[rsi]).with_suffix(".rsi")
             rsi.write(rsi_path, indent=indents)
+
+        self.names.clear()
 
 
 class SimpleSplitter(RsiSplitter):
@@ -43,15 +42,10 @@ class SimpleSplitter(RsiSplitter):
         for name, state in self.rsi.states.items():
             state_rsi = Rsi(self.rsi.size)
             state_rsi.set_state(state, name)
-            state_rsi.license = self.rsi.license
-            state_rsi.copyright = self.rsi.copyright
             result.append(state_rsi)
+            self.names[state_rsi] = state.name
 
         return result
-
-    def _get_name(self, rsi: Rsi):
-        assert len(rsi.states.keys()) == 1
-        return list(rsi.states.values())[0].name
 
 
 class HyphenSplitter(RsiSplitter):
@@ -71,10 +65,60 @@ class HyphenSplitter(RsiSplitter):
             if prefix != suffix:
                 state.name = suffix
                 state_rsi.set_state(state, suffix)
+                self.names[state_rsi] = prefix
             else:
                 state_rsi.set_state(state, name)
+                self.names[state_rsi] = name
 
         return list(groups.values())
 
-    def _get_name(self, rsi: Rsi):
-        return list(rsi.states.values())[0].name.split("-")[0]
+
+class UnderscoreSplitter(RsiSplitter):
+    """
+    Like the hyphensplitter but for underscores.
+    """
+
+    def _split(self) -> List[Rsi]:
+        groups = {}
+
+        for name, state in self.rsi.states.items():
+            prefix = name.split("_")[0]
+            suffix = name.split("_")[-1]
+            state_rsi = groups.setdefault(prefix, Rsi(self.rsi.size))
+
+            if prefix != suffix:
+                state.name = suffix
+                state_rsi.set_state(state, suffix)
+                self.names[state_rsi] = prefix
+            else:
+                state_rsi.set_state(state, name)
+                self.names[state_rsi] = name
+
+        return list(groups.values())
+
+
+class NumberSplitter(RsiSplitter):
+    """
+    Splits states based on the suffix number
+    e.g. infected, infected0, infected1 are all in the same rsi
+    """
+
+    def _split(self) -> List[Rsi]:
+        groups = {}
+        pattern = re.compile("([^0-9]*)([0-9]*)")
+
+        for name, state in self.rsi.states.items():
+            match = pattern.match(name)
+            prefix = match.group(1)
+            suffix = match.group(2) if len(match.groups()) > 1 else ""
+            state_rsi = groups.setdefault(prefix, Rsi(self.rsi.size))
+
+            if prefix != suffix:
+                state.name = suffix
+                state_rsi.set_state(state, suffix)
+                self.names[state_rsi] = prefix
+            else:
+                state_rsi.set_state(state, name)
+                self.names[state_rsi] = name
+
+        return list(groups.values())
