@@ -157,7 +157,7 @@ class Rsi(object):
         return rsi
 
     @classmethod
-    def from_dmi(cls, path) -> "Rsi":
+    def from_dmi(cls, path: Union[BytesIO, str, Path]) -> "Rsi":
         try:
             from byond.DMI import DMI
         except ImportError:
@@ -180,7 +180,7 @@ class Rsi(object):
 
                 path = buffer
             except ValueError:
-                path = Path(path)
+                path = Path(path)  # type: ignore
                 if not path.exists():
                     raise FileNotFoundError
 

@@ -108,7 +108,7 @@ class NumberSplitter(RsiSplitter):
         pattern = re.compile("([^0-9]*)([0-9]*)")
 
         for name, state in self.rsi.states.items():
-            match = pattern.match(name)  # type: ignore
+            match = pattern.match(name)
             prefix = match.group(1)  # type: ignore
             suffix = match.group(2) if len(match.groups()) > 1 else ""  # type: ignore
             state_rsi = groups.setdefault(prefix, Rsi(self.rsi.size))

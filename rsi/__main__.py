@@ -1,12 +1,12 @@
 import argparse
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Union
+from io import BytesIO
 
 from rsi import (
     Rsi,
     HyphenSplitter,
     NumberSplitter,
-    RsiSplitter,
     SimpleSplitter,
     UnderscoreSplitter,
 )
@@ -47,7 +47,7 @@ def main() -> int:
     return 1
 
 
-def from_dmi(inputf,
+def from_dmi(inputf: Union[BytesIO, Path, str],
              output: Path,
              new_license: Optional[str],
              new_copyright: Optional[str],
