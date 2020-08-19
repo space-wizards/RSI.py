@@ -155,7 +155,7 @@ class Rsi(object):
         return rsi
 
     @classmethod
-    def from_dmi(cls, path: Union[str, Path]) -> "Rsi":
+    def from_dmi(cls, path) -> "Rsi":
         try:
             from byond.DMI import DMI
         except ImportError:
