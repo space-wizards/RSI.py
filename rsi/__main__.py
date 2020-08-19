@@ -48,6 +48,9 @@ def main() -> int:
         return new_rsi(args.rsi, args.dimensions, args.copyright, args.license, not args.no_parents)
 
     if args.command == "web":
+        if isinstance(args.indents, str):
+            args.indents = int(args.indents)
+
         return web_rsi(args.url, args.output, args.license, args.splitter, args.indents)
 
     print("No command specified!")
@@ -97,9 +100,6 @@ def web_rsi(url: str,
             rsi_license: Optional[str] = "",
             splitter: Optional[str] = "",
             indents: Optional[int] = None) -> int:
-
-    if isinstance(indents, str):
-        indents = int(indents)
 
     splitter_class = {
         "hyphen": HyphenSplitter,
