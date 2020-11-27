@@ -1,7 +1,15 @@
 import argparse
 from pathlib import Path
-from typing import Optional
-from rsi import Rsi
+from typing import Optional, Union
+from io import BytesIO
+
+from rsi import (
+    Rsi,
+    HyphenSplitter,
+    NumberSplitter,
+    SimpleSplitter,
+    UnderscoreSplitter,
+)
 
 
 def main() -> int:
@@ -12,10 +20,12 @@ def main() -> int:
     subparser = parser.add_subparsers(dest="command")
 
     _from_dmi = subparser.add_parser("from_dmi", help="Will create an RSI from a BYOND DMI file.")
-    _from_dmi.add_argument("input", help="The DMI file to read from.", type=Path)
+    _from_dmi.add_argument("input", help="The DMI file to read from.")
     _from_dmi.add_argument("output", help="The RSI to output to.", type=Path)
     _from_dmi.add_argument("-c", "--copyright", help="Specifies the copyright of the new RSI file.")
+    _from_dmi.add_argument("-i", "--indents", help="Indents to use for the meta.json file.", type=int)
     _from_dmi.add_argument("-l", "--license", help="Specifies the license of the new RSI file.")
+    _from_dmi.add_argument("-s", "--splitter", help="Splitter to use for the rsi if applicable.")
 
     _new_rsi = subparser.add_parser("new", help="Will create a new RSI at the provided directory.")
     _new_rsi.add_argument("rsi", help="The location of the new RSI. Must not exist yet.", type=Path)
@@ -27,7 +37,7 @@ def main() -> int:
     args = parser.parse_args()
 
     if args.command == "from_dmi":
-        from_dmi(args.input, args.output, args.license, args.copyright)
+        from_dmi(args.input, args.output, args.license, args.copyright, args.indents, args.splitter)
         return 0
 
     if args.command == "new":
@@ -37,13 +47,29 @@ def main() -> int:
     return 1
 
 
-def from_dmi(inputf: Path, output: Path, new_license: Optional[str], new_copyright: Optional[str]) -> None:
+def from_dmi(inputf: Union[BytesIO, Path, str],
+             output: Path,
+             new_license: Optional[str],
+             new_copyright: Optional[str],
+             indents: Optional[int] = None,
+             splitter: Optional[str] = "",) -> None:
     rsi = Rsi.from_dmi(inputf)
     if new_license:
         rsi.license = new_license
     if new_copyright:
         rsi.copyright = new_copyright
-    rsi.write(output)
+
+    splitter_class = {
+        "hyphen": HyphenSplitter,
+        "number": NumberSplitter,
+        "simple": SimpleSplitter,
+        "underscore": UnderscoreSplitter,
+    }.get(splitter, None)  # type: ignore
+
+    if splitter_class is None:
+        rsi.write(output)
+    else:
+        splitter_class(rsi).split_to(output, indents)
 
 
 def new_rsi(loc: Path,

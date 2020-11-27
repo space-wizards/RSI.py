@@ -2,6 +2,8 @@ import json
 import math
 from pathlib import Path
 from typing import Dict, Tuple, Union, cast, TextIO, Any, List, Type, Optional
+from urllib.request import urlopen
+from io import BytesIO
 from PIL import Image
 from .direction import Direction
 from .state import State
@@ -155,20 +157,42 @@ class Rsi(object):
         return rsi
 
     @classmethod
-    def from_dmi(cls, path: Union[str, Path]) -> "Rsi":
+    def from_dmi(cls, path: Union[BytesIO, str, Path]) -> "Rsi":
         try:
             from byond.DMI import DMI
         except ImportError:
             raise ImportError("Unable to import byondtoolsv3.")
 
+        # We'll set the copyright to the url if applicable
+        url_copyright = None
+
         if isinstance(path, Path):
             path = str(path)
+        elif isinstance(path, BytesIO):
+            pass
+        else:
+            # Try URL / filepath
+            try:
+                with urlopen(path) as response:
+                    buffer = BytesIO()
+                    buffer.write(response.read())
+                    url_copyright = path
+
+                path = buffer
+            except ValueError:
+                path = Path(path)  # type: ignore
+                if not path.exists():
+                    raise FileNotFoundError
+
+                path = str(path)
 
         # N3X15, if you are reading this:
         # You are awful at API design.
         dmi = DMI(path)
         dmi.loadAll()
         rsi = Rsi((dmi.icon_width, dmi.icon_height))
+        if url_copyright is not None:
+            rsi.copyright = url_copyright
 
         for dmstate in dmi.states.values():
             rsstate = rsi.new_state(dmstate.dirs, dmstate.name)  # type: State
