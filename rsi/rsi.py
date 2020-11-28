@@ -1,5 +1,7 @@
 import json
 import math
+from os import listdir
+from os.path import isfile, join
 from pathlib import Path
 from typing import Dict, Tuple, Union, cast, TextIO, Any, List, Type, Optional
 from urllib.request import urlopen
@@ -214,5 +216,25 @@ class Rsi(object):
                         delay = 1.0
                     rsstate.delays[x].append(delay)
                     rsstate.icons[x].append(dmstate.getFrame(direction.to_byond(), y))
+
+        return rsi
+
+    @classmethod
+    def from_folder(cls, path: Union[str, Path]) -> "Rsi":
+
+        if isinstance(path, Path):
+            path = str(path)
+
+        pngFiles = [f for f in listdir(path) if isfile(join(path, f))]
+
+        if pngFiles.count == 0:
+            raise IOError("Empty folder passed to from_folder().")
+
+        firstPng = Image.open(Path(pngFiles[0])) # Is there a better way to figure out the size? Ask the user?
+        rsi = Rsi((firstPng.width, firstPng.height))
+
+        for pngFile in pngFiles:
+            image = Image.open(Path(pngFile))
+            rsi.new_state(1, image.name) # it would be nice to create animations based on a filename pattern like thing_1.png, thing_2.png etc
 
         return rsi
