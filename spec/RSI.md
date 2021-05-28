@@ -30,7 +30,7 @@ Key | Meaning
 
 States cannot have the same identifying value. Two states with the same name may not exist.
 
-Other than the identifier, a state has two other fields in relation to the actual sprites as seen in game:
+Other than the identifier, a state has three other fields in relation to the actual sprites as seen in game:
 
 Key | Meaning
 --- | -------
