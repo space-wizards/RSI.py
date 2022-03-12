@@ -98,3 +98,4 @@ Note that in practice the JSON writer probably writes the most compact JSON poss
 * Editing an RSI must be possible without proper tooling. This means no binary metadata or metadata inside PNG files.
 * It must be easily diffable on GitHub.
 * It must not bloat Git history too much when changes are made (prevent large file rewrites).
+* One PNG One Image
