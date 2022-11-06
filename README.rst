@@ -1,4 +1,1 @@
-RSI.py
-======
-
-RSI.py is a library for using RSI files used in the SS13 remake Space Station 14.
+ARCHIVED. PLEASE GO TO https://github.com/space-wizards/RSI.NET FOR LATEST RSI 
